@@ -1,0 +1,266 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum UserRole {
+  CUSTOMER
+  VENUE_OWNER
+  ADMIN
+}
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIAL_REFUND
+}
+enum Gender {
+  MALE
+  FEMALE
+}
+enum VenueType {
+  TURF
+  GYM
+  SPORTS_COMPLEX
+  BADMINTON
+  TENNIS
+  BASKETBALL
+  SWIMMING_POOL
+}
+enum BookingStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIAL_REFUND
+}
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  NET_BANKING
+  WALLET
+}
+model User {
+  id           String    @id @default(cuid())
+  email_address        String    @unique
+  clerkId      String?   @unique
+  first_name   String?
+  last_name    String?
+  phone        String?
+  role         UserRole  @default(CUSTOMER)
+  avatarUrl    String?
+  dateOfBirth  DateTime? @db.Date
+  gender       Gender?
+  isVerified   Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  username     String?
+
+
+  // Relations
+  venues          Venue[]
+  bookings        Booking[]
+  reviews         Review[]
+  favoriteVenues  FavoriteVenue[]
+  notifications   Notification[]
+}
+
+model Venue {
+  id           String    @id @default(cuid())
+  ownerId      String
+  name         String
+  description  String?
+  venueType    VenueType
+  address      String
+  city         String
+  state        String
+  pincode      String
+  latitude     Float?
+  longitude    Float?
+  phone        String?
+  email        String?
+  websiteUrl   String?
+  rating       Float     @default(0.0)
+  totalReviews Int       @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Relations
+  owner          User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  courts         Court[]
+  images         VenueImage[]
+  amenities      VenueAmenity[]
+  hours          VenueHour[]
+  reviews        Review[]
+  favoriteVenues FavoriteVenue[]
+}
+
+model VenueImage {
+  id        String   @id @default(cuid())
+  venueId   String
+  imageUrl  String
+  isPrimary Boolean  @default(false)
+  caption   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+}
+
+model Amenity {
+  id       String @id @default(cuid())
+  name     String @unique
+  icon     String?
+  category String? // 'facility', 'equipment', 'service'
+
+  // Relations
+  venues VenueAmenity[]
+}
+
+model VenueAmenity {
+  venueId   String
+  amenityId String
+
+  // Relations
+  venue   Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  amenity Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([venueId, amenityId])
+}
+
+model Court {
+  id           String   @id @default(cuid())
+  venueId      String
+  name         String
+  courtType    String   // 'football', 'cricket', 'badminton', 'gym_floor'
+  capacity     Int?
+  hourlyRate   Float
+  description  String?
+  lengthMeters Float?
+  widthMeters  Float?
+  surfaceType  String? // 'artificial_grass', 'natural_grass', 'hardcourt'
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  venue    Venue     @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+}
+
+model VenueHour {
+  id        String  @id @default(cuid())
+  venueId   String
+  dayOfWeek Int     // 0 = Sunday, 1 = Monday, etc.
+  openTime  String  // Store as "HH:MM" format
+  closeTime String
+  isClosed  Boolean @default(false)
+
+  // Relations
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  userId        String
+  courtId       String
+  bookingDate   DateTime      @db.Date
+  startTime     String        // "HH:MM" format
+  endTime       String
+  durationHours Float
+  totalAmount   Float
+  bookingStatus BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  paymentMethod PaymentMethod?
+  paymentId     String?       // External payment gateway ID
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  court  Court   @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  review Review?
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  venueId   String
+  bookingId String?  @unique // Optional: link to specific booking
+  rating    Int      // 1-5 stars
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  venue   Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+}
+
+model FavoriteVenue {
+  userId    String
+  venueId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@id([userId, venueId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // 'booking_confirmed', 'payment_reminder', 'review_request'
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// For tracking peak hours and pricing
+model PeakHour {
+  id         String @id @default(cuid())
+  courtId    String
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
+  multiplier Float  @default(1.5) // Price multiplier during peak hours
+}
+
+// For discount coupons
+model Coupon {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  description   String?
+  discountType  String   // 'percentage', 'fixed'
+  discountValue Float
+  minAmount     Float?
+  maxDiscount   Float?
+  validFrom     DateTime
+  validUntil    DateTime
+  usageLimit    Int?
+  usedCount     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
