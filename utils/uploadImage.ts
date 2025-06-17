@@ -12,7 +12,7 @@ export async function uploadImage(file: File) {
   const filePath = `venues/${fileName}`;
 
   const { data, error } = await supabase.storage
-    .from('venue-images')
+    .from('images')
     .upload(filePath, file);
 
   if (error) throw error;
