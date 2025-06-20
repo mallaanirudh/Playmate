@@ -1,268 +1,199 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Star, MapPin, Clock, Users, Calendar, Search, Filter, Plus } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 
-export default function VenueBookingDashboard() {
-  const router = useRouter()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedVenue, setSelectedVenue] = useState(null)
+export default function DashboardPage() {
+  const [venues, setVenues] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const venues = [
-    {
-      id: 1,
-      name: "Elite Sports Turf",
-      category: "turf",
-      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=250&fit=crop",
-      rating: 4.8,
-      reviews: 124,
-      location: "Downtown Sports Complex",
-      price: "₹800/hour",
-      features: ["Floodlights", "Changing Rooms", "Parking"],
-      availability: "Available Now",
-      description: "Premium artificial turf with professional lighting"
-    },
-    {
-      id: 2,
-      name: "Crystal Clear Pool",
-      category: "pool",
-      image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=250&fit=crop",
-      rating: 4.9,
-      reviews: 89,
-      location: "Luxury Resort Area",
-      price: "₹1,200/hour",
-      features: ["Heated Pool", "Lifeguard", "Pool Equipment"],
-      availability: "Available Today",
-      description: "Olympic-sized swimming pool with crystal clear water"
-    },
-    {
-      id: 3,
-      name: "Championship Court",
-      category: "court",
-      image: "https://images.unsplash.com/photo-1552057426-c4a71681057e?w=400&h=250&fit=crop",
-      rating: 4.7,
-      reviews: 156,
-      location: "Sports Arena",
-      price: "₹600/hour",
-      features: ["Professional Court", "Equipment Rental", "Seating"],
-      availability: "Available Tomorrow",
-      description: "Professional basketball court with spectator seating"
-    },
-    {
-      id: 4,
-      name: "Green Valley Turf",
-      category: "turf",
-      image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=400&h=250&fit=crop",
-      rating: 4.6,
-      reviews: 78,
-      location: "Valley Sports Club",
-      price: "₹700/hour",
-      features: ["Natural Grass", "Scoreboard", "Refreshments"],
-      availability: "Available Now",
-      description: "Natural grass football turf in scenic valley location"
-    },
-    {
-      id: 5,
-      name: "Aqua Paradise",
-      category: "pool",
-      image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=250&fit=crop",
-      rating: 4.5,
-      reviews: 92,
-      location: "Waterfront District",
-      price: "₹1,000/hour",
-      features: ["Infinity Pool", "Poolside Bar", "Towel Service"],
-      availability: "Available This Week",
-      description: "Infinity pool with stunning waterfront views"
-    },
-    {
-      id: 6,
-      name: "Pro Tennis Court",
-      category: "court",
-      image: "https://images.unsplash.com/photo-1542356517-7a0a0b6d9e33?w=400&h=250&fit=crop",
-      rating: 4.8,
-      reviews: 134,
-      location: "Tennis Academy",
-      price: "₹500/hour",
-      features: ["Clay Court", "Net Equipment", "Ball Machine"],
-      availability: "Available Now",
-      description: "Professional clay tennis court with equipment included"
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const res = await fetch('/api/getallvenues')
+        const data = await res.json()
+        if (res.ok) {
+          setVenues(data.venues)
+        } else {
+          console.error(data.error)
+        }
+      } catch (error) {
+        console.error('Error fetching venues:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
 
-  const categories = [
-    { id: 'all', name: 'All Venues', count: venues.length },
-    { id: 'turf', name: 'Sports Turfs', count: venues.filter(v => v.category === 'turf').length },
-    { id: 'pool', name: 'Swimming Pools', count: venues.filter(v => v.category === 'pool').length },
-    { id: 'court', name: 'Sports Courts', count: venues.filter(v => v.category === 'court').length }
-  ]
+    fetchVenues()
+  }, [])
 
-  const filteredVenues = venues.filter(venue => {
-    const matchesSearch = venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         venue.location.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || venue.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
-
-  const handleBookVenue = (venue:any) => {
-    setSelectedVenue(venue)
-    // In a real app, this would open a booking modal or navigate to booking page
-    alert(`Booking ${venue.name} - This would open the booking form!`)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+          <p className="text-xl text-gray-600 font-medium">Loading amazing venues...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                VenueBook
-              </h1>
-              <p className="text-gray-600 mt-1">Find and book the perfect venue</p>
-            </div>
-            <button 
-              onClick={() => router.push('/dashboard/CreateVenue')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex items-center gap-2"
-            >
-              <Plus size={20} />
-              List Your Venue
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 py-16 sm:py-20">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
+              Discover Amazing
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
+                Venues
+              </span>
+            </h1>
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+              Find the perfect space for your next event, celebration, or gathering
+            </p>
           </div>
+        </div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 -left-8 w-32 h-32 bg-purple-300/20 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-20 h-20 bg-yellow-300/20 rounded-full blur-xl"></div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filter Section */}
-        <div className="mb-8 space-y-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search venues by name or location..."
-              className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      {/* Venues Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
+        {venues.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900 mb-2">No venues found</h3>
+            <p className="text-gray-600">Check back later for amazing venues!</p>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {venues.map((venue, index) => {
+              const image = venue.images?.[0]
+              const imageUrl = image ?? null
 
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-3">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                  selectedCategory === category.id
-                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                    : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                <Filter size={16} />
-                {category.name}
-                <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-sm ml-1">
-                  {category.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Venues Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredVenues.map(venue => (
-            <div key={venue.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group">
-              <div className="relative overflow-hidden">
-                <img 
-                  src={venue.image} 
-                  alt={venue.name}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-green-600">
-                  {venue.availability}
-                </div>
-                <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-medium capitalize">
-                  {venue.category}
-                </div>
-              </div>
-              
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {venue.name}
-                  </h3>
-                  <div className="flex items-center gap-1">
-                    <Star className="text-yellow-400 fill-current" size={16} />
-                    <span className="text-sm font-medium text-gray-700">
-                      {venue.rating} ({venue.reviews})
-                    </span>
-                  </div>
-                </div>
-                
-                <p className="text-gray-600 mb-4 text-sm">
-                  {venue.description}
-                </p>
-                
-                <div className="flex items-center gap-2 mb-4 text-gray-600">
-                  <MapPin size={16} />
-                  <span className="text-sm">{venue.location}</span>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {venue.features.map(feature => (
-                    <span key={feature} className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {venue.price}
-                  </div>
-                  <button 
-                    onClick={() => handleBookVenue(venue)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl font-semibold hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex items-center gap-2"
+              return (
+                <Link href={`/bookings/${venue.id}`} key={venue.id}>
+                  <div 
+                    className="group bg-white shadow-lg hover:shadow-2xl rounded-2xl overflow-hidden cursor-pointer transform hover:-translate-y-2 transition-all duration-300 ease-out border border-gray-100 hover:border-indigo-200"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <Calendar size={16} />
-                    Book Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                    {/* Image Container */}
+                    <div className="relative overflow-hidden">
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={venue.name}
+                          width={500}
+                          height={300}
+                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                        />
+                      ) : (
+                        <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400 group-hover:from-gray-200 group-hover:to-gray-300 transition-colors duration-300">
+                          <div className="text-center">
+                            <svg className="w-16 h-16 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p className="text-sm font-medium">No Image Available</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
 
-        {filteredVenues.length === 0 && (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <Search size={64} className="mx-auto" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">No venues found</h3>
-            <p className="text-gray-500">Try adjusting your search criteria or browse all venues</p>
+                    {/* Content */}
+                    <div className="p-6 space-y-4">
+                      {/* Title and Location */}
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors duration-200 line-clamp-1">
+                          {venue.name}
+                        </h2>
+                        {venue.location && (
+                          <div className="flex items-center text-gray-600 mb-3">
+                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="text-sm font-medium">{venue.location}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Description */}
+                      {venue.description && (
+                        <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
+                          {venue.description}
+                        </p>
+                      )}
+
+                      {/* Details Grid */}
+                      <div className="space-y-3 pt-2">
+                        {venue.price && (
+                          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                              </svg>
+                              <span className="text-sm font-medium text-gray-700">Price</span>
+                            </div>
+                            <span className="text-green-700 font-bold">{venue.price}</span>
+                          </div>
+                        )}
+
+                        {venue.timings && (
+                          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-sm font-medium text-gray-700">Hours</span>
+                            </div>
+                            <span className="text-blue-700 font-semibold text-sm">{venue.timings}</span>
+                          </div>
+                        )}
+
+                        {venue.contact && (
+                          <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                              </svg>
+                              <span className="text-sm font-medium text-gray-700">Contact</span>
+                            </div>
+                            <span className="text-purple-700 font-semibold text-sm">{venue.contact}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Book Now Button */}
+                      <div className="pt-4">
+                        <div className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold text-center group-hover:from-indigo-700 group-hover:to-purple-700 transition-all duration-200 transform group-hover:scale-105">
+                          <span className="flex items-center justify-center">
+                            Book Now
+                            <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         )}
-
-        {/* Stats Section */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl">
-            <div className="text-3xl font-bold mb-2">{venues.length}</div>
-            <div className="text-blue-100">Total Venues</div>
-          </div>
-          <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl">
-            <div className="text-3xl font-bold mb-2">2.4k+</div>
-            <div className="text-green-100">Happy Customers</div>
-          </div>
-          <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl">
-            <div className="text-3xl font-bold mb-2">4.8</div>
-            <div className="text-purple-100">Average Rating</div>
-          </div>
-          <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-2xl">
-            <div className="text-3xl font-bold mb-2">24/7</div>
-            <div className="text-orange-100">Support Available</div>
-          </div>
-        </div>
       </div>
     </div>
   )

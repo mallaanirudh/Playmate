@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { uploadImage } from '@/utils/uploadImage'; // you'll create this
+import { useRouter } from 'next/navigation';
 
 export default function VenueForm() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ export default function VenueForm() {
     email: '',
     websiteUrl: '',
   });
+   const router = useRouter();
+
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState('');
@@ -47,26 +50,49 @@ export default function VenueForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
-    e.preventDefault();
-    if (!imageUrl) return alert('Please upload an image before submitting.');
+  e.preventDefault();
+  if (!imageUrl) return alert('Please upload an image before submitting.');
 
-    try {
-      const res = await fetch('/api/venue', {
+  try {
+    // 1. Create Venue
+    const res = await fetch('/api/venue', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData), // remove imageUrl, we will link image separately
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      const venueId = data.venue.id; // Assuming API returns the created venue
+
+      // 2. Upload Venue Image record
+      const imageRes = await fetch('/api/venueImage', { // create this API
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, imageUrl }),
+        body: JSON.stringify({
+          venueId,
+          imageUrl,
+          isPrimary: true,
+          caption: 'Optional Caption',
+        }),
       });
 
-      const data = await res.json();
-      if (data.success) {
-        alert('Venue created successfully!');
+      const imageData = await imageRes.json();
+
+      if (imageData.success) {
+        alert('Venue and image created successfully!');
+        router.push('/uservenues');  //Pushing the users, if sucessfull to another page to not let him submit the same thing multiple times. Is there a better method? try it.
       } else {
-        alert('Failed to create venue: ' + data.error);
+        alert('Venue created, but failed to save image: ' + imageData.error);
       }
-    } catch (err: any) {
-      alert('Error submitting form: ' + err.message);
+    } else {
+      alert('Failed to create venue: ' + data.error);
     }
-  };
+  } catch (err: any) {
+    alert('Error submitting form: ' + err.message);
+  }
+};
 
   const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white";
   const labelClasses = "block text-sm font-medium text-gray-700 mb-2";

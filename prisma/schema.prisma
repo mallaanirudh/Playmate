@@ -13,6 +13,12 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+enum TournamentStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
 enum UserRole {
   CUSTOMER
   VENUE_OWNER
@@ -76,6 +82,7 @@ model User {
   reviews         Review[]
   favoriteVenues  FavoriteVenue[]
   notifications   Notification[]
+  tournament      Tournament[]
 }
 
 model Venue {
@@ -98,6 +105,9 @@ model Venue {
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  price       String?
+  timings     String?  
+  contact     String?
 
   // Relations
   owner          User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -263,4 +273,22 @@ model Coupon {
   usedCount     Int      @default(0)
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
+}
+model Tournament {
+  id            String   @id @default(cuid())
+  name          String
+  description   String
+  venue_address String
+  city          String?
+  state         String?
+  country       String?
+  prize_money   Int?
+  startDate     DateTime
+  endDate       DateTime
+  status        TournamentStatus @default(PLANNED)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  ownerId       String
+  owner         User @relation(fields: [ownerId], references: [id])
 }

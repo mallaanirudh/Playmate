@@ -1,294 +1,260 @@
 'use client'
-import { Waitlist } from '@clerk/nextjs'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation'
 
-export default function Page() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [isLoaded, setIsLoaded] = useState(false)
+const items = [
+  { id: 1, image: '/tennis.png', number: '0', description: 'Venues Listed' },
+  { id: 2, image: '/tennis.png', number: '0', description: 'Athletes Reached' },
+  { id: 3, image: '/tennis.png', number: '0', description: 'Cities Covered' },
+  { id: 4, image: '/tennis.png', number: '0', description: 'Tournaments Hosted' },
+  { id: 5, image: '/tennis.png', number: '0', description: 'Challenges Created' },
+  { id: 6, image: '/tennis.png', number: '0', description: 'Matches Played' },
+];
+interface AnimatedCounterProps {
+  target: number;
+  duration?: number; // optional, defaults to 2000
+}
 
+const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ target, duration = 2000 }) => {
+  const [count, setCount] = useState(0);
+  
   useEffect(() => {
-    setIsLoaded(true)
+    const startTime = Date.now();
+    const endTime = startTime + duration;
     
-    const handleMouseMove = (e: any) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
+    const timer = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(endTime - now, 0);
+      const progress = 1 - remaining / duration;
+      
+      if (remaining === 0) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.round(target * progress));
+      }
+    }, 16);
+    
+    return () => clearInterval(timer);
+  }, [target, duration]);
+  
+  return count;
+};
 
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+export default function PlayMateLanding() {
+  const [isVisible, setIsVisible] = useState(false);
+  const router = useRouter();
+  const handleClick = () => {
+    router.push('/about') // Replace with your target route
+  }
+  
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-950">
-      {/* Abstract Background Elements */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-30">
-        {/* Geometric Grid */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(90deg, rgba(30, 58, 138, 0.05) 1px, transparent 1px),
-            linear-gradient(0deg, rgba(30, 58, 138, 0.05) 1px, transparent 1px)
-          `,
-          backgroundSize: '60px 60px'
-        }} />
-        
-        {/* Floating Circles */}
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`circle-${i}`}
-            className="absolute rounded-full bg-blue-200/30 dark:bg-blue-800/30"
-            style={{
-              width: `${100 + Math.random() * 200}px`,
-              height: `${100 + Math.random() * 200}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              filter: 'blur(40px)'
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Interactive Mouse Trail */}
-      <div
-        className="fixed pointer-events-none z-10 transition-all duration-300 ease-out"
-        style={{
-          left: mousePosition.x - 50,
-          top: mousePosition.y - 50,
-          width: '100px',
-          height: '100px',
-          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)',
-          borderRadius: '50%',
-        }}
-      />
-
-      {/* Main Content Container */}
-      <div className="relative z-20 min-h-screen flex items-center justify-center p-4">
-        <div 
-          className={`transform transition-all duration-1000 ${
-            isLoaded ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-12 opacity-0 scale-95'
-          }`}
-        >
-          {/* Hero Section */}
-          <div className="text-center mb-12">
-            <div className="relative inline-block mb-8">
-              <div className="absolute -inset-4 bg-blue-200/50 dark:bg-blue-800/50 rounded-full blur-lg opacity-70 animate-pulse" />
-              <div className="relative bg-white dark:bg-blue-950 p-6 rounded-full shadow-xl border border-blue-100 dark:border-blue-900">
-                <svg className="w-16 h-16 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                  <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="2"/>
-                </svg>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Hero Section with Landing Image */}
+      <section className="relative overflow-hidden">
+        <img 
+          className="w-full h-screen object-cover" 
+          src="/landing.png" 
+          alt="PlayMate Landing" 
+        />
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <div className="text-center text-white px-6">
+            <div className={`transform transition-all duration-1000 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+              {/* Logo Placeholder */}
+              <div className="mb-8">
+                
               </div>
-            </div>
-            
-            <h1 className="text-10xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300 bg-clip-text text-transparent mb-6 leading-tight">
-              PlayMate
-            </h1>
-            
-            <div className="space-y-4 mb-8">
-              <p className="text-xl text-blue-800/80 dark:text-blue-200 font-medium">
-                Book Premium Turfs • Find Playmates • Play Together
+              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-black">
+                Find Your Perfect
+                <span className="block text-black-300">PlayMate</span>
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-black-100 max-w-3xl mx-auto">
+                Connect with athletes, discover venues, and elevate your game
               </p>
-              <p className="text-lg text-blue-700/70 dark:text-blue-300/80 max-w-md mx-auto">
-                The ultimate platform for sports enthusiasts to discover, book, and connect
-              </p>
-            </div>
-
-            {/* Feature Icons */}
-            <div className="flex flex-wrap justify-center gap-6 mb-12">
-              {[
-                {
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  ),
-                  text: "Book Turfs"
-                },
-                {
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  ),
-                  text: "Find Players"
-                },
-                {
-                  icon: (
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  ),
-                  text: "Play & Win"
-                }
-              ].map((feature, i) => (
-                <div key={i} className="group">
-                  <div className="w-24 h-24 bg-white/80 dark:bg-blue-900/50 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center p-4 border border-blue-100 dark:border-blue-800 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:border-blue-300 dark:group-hover:border-blue-500">
-                    <div className="text-blue-600 dark:text-blue-400 mb-2 transition-all duration-300 group-hover:scale-110">
-                      {feature.icon}
-                    </div>
-                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">{feature.text}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Waitlist Container */}
-          <div className="relative max-w-md mx-auto">
-            {/* Glow Effect */}
-            <div className="absolute -inset-4 bg-blue-200/30 dark:bg-blue-800/30 rounded-3xl blur-xl opacity-70 animate-pulse" />
-            
-            {/* Main Card */}
-            <div className="relative backdrop-blur-sm bg-white/80 dark:bg-blue-950/80 rounded-2xl p-8 shadow-xl border border-blue-100/50 dark:border-blue-900/50">
-              {/* Content */}
-              <div className="relative z-10">
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl font-bold text-blue-800 dark:text-blue-100 mb-2">
-                    Join the Waitlist
-                  </h2>
-                  <p className="text-blue-600/80 dark:text-blue-300/80">
-                    Be the first to experience the future of sports booking
-                  </p>
-                </div>
-
-                {/* Enhanced Waitlist Component */}
-                <div className="waitlist-sports-wrapper">
-                  <style jsx global>{`
-                    .waitlist-sports-wrapper .cl-formButtonPrimary {
-                      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-                      border: none !important;
-                      border-radius: 12px !important;
-                      padding: 16px 32px !important;
-                      font-weight: 600 !important;
-                      font-size: 16px !important;
-                      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3) !important;
-                      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-formButtonPrimary:hover {
-                      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-                      transform: translateY(-2px) !important;
-                      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4) !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-formFieldInput {
-                      background: rgba(255, 255, 255, 0.8) !important;
-                      border: 1px solid rgba(59, 130, 246, 0.3) !important;
-                      border-radius: 12px !important;
-                      color: #1e3a8a !important;
-                      padding: 16px 20px !important;
-                      font-size: 16px !important;
-                      font-weight: 500 !important;
-                      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
-                      transition: all 0.3s ease !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-formFieldInput:focus {
-                      border-color: #3b82f6 !important;
-                      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
-                      outline: none !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-formFieldInput::placeholder {
-                      color: rgba(30, 58, 138, 0.5) !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-formFieldLabel {
-                      color: #1e40af !important;
-                      font-weight: 600 !important;
-                      font-size: 14px !important;
-                      margin-bottom: 8px !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-rootBox {
-                      color: #1e3a8a !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-headerTitle {
-                      color: #1e40af !important;
-                      font-size: 24px !important;
-                      font-weight: 700 !important;
-                      margin-bottom: 8px !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-headerSubtitle {
-                      color: #3b82f6 !important;
-                      font-size: 16px !important;
-                      line-height: 1.5 !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-footer {
-                      margin-top: 16px !important;
-                    }
-                    
-                    .waitlist-sports-wrapper .cl-footerActionLink {
-                      color: #2563eb !important;
-                      font-weight: 600 !important;
-                    }
-
-                    /* Dark mode styles */
-                    .dark .waitlist-sports-wrapper .cl-formFieldInput {
-                      background: rgba(30, 41, 59, 0.8) !important;
-                      border: 1px solid rgba(59, 130, 246, 0.3) !important;
-                      color: #f8fafc !important;
-                    }
-                    
-                    .dark .waitlist-sports-wrapper .cl-formFieldInput::placeholder {
-                      color: rgba(191, 219, 254, 0.5) !important;
-                    }
-                    
-                    .dark .waitlist-sports-wrapper .cl-formFieldLabel {
-                      color: #93c5fd !important;
-                    }
-                    
-                    .dark .waitlist-sports-wrapper .cl-rootBox {
-                      color: #f8fafc !important;
-                    }
-                    
-                    .dark .waitlist-sports-wrapper .cl-headerTitle {
-                      color: #f8fafc !important;
-                    }
-                    
-                    .dark .waitlist-sports-wrapper .cl-headerSubtitle {
-                      color: #93c5fd !important;
-                    }
-                    
-                    .dark .waitlist-sports-wrapper .cl-footerActionLink {
-                      color: #60a5fa !important;
-                    }
-                  `}</style>
-                  <Waitlist />
-                </div>
-
-                {/* Bottom Features */}
-                <div className="mt-8 grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-blue-100/50 dark:bg-blue-900/30 backdrop-blur-sm rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                    <div className="text-xl mb-1">🏟️</div>
-                    <div className="text-xs font-medium text-blue-800 dark:text-blue-200">Premium Venues</div>
-                  </div>
-                  <div className="bg-blue-100/50 dark:bg-blue-900/30 backdrop-blur-sm rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                    <div className="text-xl mb-1">🤝</div>
-                    <div className="text-xs font-medium text-blue-800 dark:text-blue-200">Team Matching</div>
-                  </div>
-                </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onClick={()=>router.push('/dashboard')}className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-yellow-300 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                  Find Venues
+                </button>
+                <button onClick = {()=>router.push('/dashboard/CreateVenue')}className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300">
+                  List Your Venue
+                </button>
               </div>
-            </div>
-          </div>
-
-          {/* Coming Soon Badge */}
-          <div className="text-center mt-8">
-            <div className="inline-flex items-center px-5 py-2 bg-blue-100/70 dark:bg-blue-900/50 backdrop-blur-sm rounded-full border border-blue-200 dark:border-blue-800">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse mr-2"></div>
-              <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Launching Soon • Early Access Available</span>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Stats Section with Original Images */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <div className={`text-center mb-16 transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-4 flex-wrap">
+              The 
+              <img 
+                src="/playmate_word.png" 
+                className="h-16 md:h-20 inline-block" 
+                alt="PlayMate"
+              /> 
+              Impact
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Join thousands of athletes and venue owners who trust PlayMate to connect and grow
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {items.map((item, index) => (
+              <div 
+                key={item.id} 
+                className={`bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-lg p-6 text-center hover:shadow-2xl transform hover:scale-105 transition-all duration-500 border border-gray-100 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                style={{ transitionDelay: `${index * 100 + 500}ms` }}
+              >
+                <img 
+                  src={item.image} 
+                  alt={item.description} 
+                  className="w-32 h-24 object-cover rounded-xl mb-6 mx-auto shadow-md" 
+                />
+                <div className="text-4xl font-bold mb-3 text-blue-600">
+                  <AnimatedCounter target={parseInt(item.number.replace(/\D/g, ''))} />
+                  {item.number.includes('+') ? '+' : ''}
+                </div>
+                <p className="text-gray-700 font-medium text-lg">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Decorative Image */}
+      <div className="w-full flex justify-center py-8 bg-gradient-to-r from-blue-50 to-purple-50">
+        <img 
+          src="/pen.png" 
+          alt="Decorative" 
+          className="max-w-xs opacity-80 hover:opacity-100 transition-opacity duration-300"
+        />
       </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 py-4 text-center">
-        <p className="text-sm text-blue-600/70 dark:text-blue-400/70">
-          © {new Date().getFullYear()} TurfConnect. All rights reserved.
-        </p>
-      </div>
+      {/* Features Section with Tennis Image */}
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            {/* Image Side */}
+            <div className="w-full lg:w-1/2">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur opacity-20"></div>
+                <div className="relative">
+                  <img 
+                    src="/tennis.png" 
+                    alt="Tennis Court" 
+                    className="w-full h-80 object-cover rounded-3xl shadow-2xl hover:shadow-3xl transition-shadow duration-300" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Content Side */}
+            <div className="w-full lg:w-1/2 space-y-8">
+              <div className="space-y-6">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                  From Gyms to Grounds
+                  <span className="block text-blue-600">Find Your Perfect Spot</span>
+                </h1>
+                
+                <div className="space-y-6">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">🎯 Discover & Book</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Find top-rated fitness studios, sports courts, and open fields near you. Whether training solo or with friends, discover the perfect space in seconds. Filter by sport, time and location.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">🏟️ Get Discovered</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Connect with thousands of players looking for the perfect place to play. Join a community that shares your passion for sports.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Venue Owner Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
+            {/* Image Side */}
+            <div className="w-full lg:w-1/2">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-green-600 to-blue-600 rounded-3xl blur opacity-20"></div>
+                <div className="relative">
+                  <img 
+                    src="/tennis.png" 
+                    alt="Venue Management" 
+                    className="w-full h-80 object-cover rounded-3xl shadow-2xl hover:shadow-3xl transition-shadow duration-300" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Content Side */}
+            <div className="w-full lg:w-1/2 space-y-8">
+              <div className="space-y-6">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                  List Your Venue on
+                  <span className="block text-green-600">PlayMate</span>
+                </h1>
+                
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 shadow-lg border border-green-100">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">🚀 Fill Slots Faster</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Own a turf, court, gym, or training facility? PlayMate helps to fill your slots faster and maximize your bookings.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 shadow-lg border border-blue-100">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">📅 Simple Management</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      List your venue, set your schedule, and start accepting bookings from athletes nearby. Get discovered by thousands of players looking for the perfect place to play.
+                    </p>
+                  </div>
+                </div>
+                
+                <button onClick={()=> router.push('/dashboard')}className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center gap-2 group">
+                  Go to Venues Section
+                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Ready to Elevate Your Game?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join the PlayMate community today and discover a new way to connect, play, and grow in sports.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            
+            <button onClick={handleClick} className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300">
+              Learn More
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
-  )
+  );
 }
