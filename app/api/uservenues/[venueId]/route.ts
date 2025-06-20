@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 // GET - Fetch Venue Details
 export async function GET(req: Request, { params }: { params: { venueId: string } }) {
   const { userId } = await auth()
-  const {venueId} = await params;
+  const {venueId} =  params;
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,7 +26,7 @@ export async function GET(req: Request, { params }: { params: { venueId: string 
 // PUT - Update Venue Details
 export async function PUT(req: Request, { params }: { params: { venueId: string } }) {
   const { userId } = await auth()
-  const {venueId}=await params;
+  const {venueId}= params;
 
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
