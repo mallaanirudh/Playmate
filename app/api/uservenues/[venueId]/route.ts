@@ -3,16 +3,12 @@ import { db } from '@/lib/db'
 import { auth } from '@clerk/nextjs/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-type RouteParams = {
-  params: {
-    venueId: string
-  }
-}
+
 
 // GET - Fetch Venue Details
 export async function GET(
   req: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { venueId: string } }
 ): Promise<NextResponse> {
   const { userId } = await auth();
   const { venueId } = params
@@ -35,7 +31,7 @@ export async function GET(
 // PUT - Update Venue Details
 export async function PUT(
   req: NextRequest,
-  { params }: RouteParams
+  { params }:  { params: { venueId: string } }
 ): Promise<NextResponse> {
   const { userId } =await  auth();
   const { venueId } = params
