@@ -1,12 +1,8 @@
 import { db } from '@/lib/db'
 
-interface BookingPageProps {
-  params: {
-    bookingId: string
-  }
-}
 
-export default async function BookingConfirmationPage({params}:{ params : {bookingId: string}}) {
+
+export default async function BookingConfirmationPage({params}:{ params : Promise<{bookingId: string}>}) {
   const { bookingId } = await params
 
   const booking = await db.booking.findUnique({
