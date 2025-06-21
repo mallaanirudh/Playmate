@@ -26,12 +26,15 @@ export default function BookingForm() {
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...formData, courtId: venueId })
+      body: JSON.stringify({ ...formData,  venueId })
     })
 
     if (res.ok) {
       alert('Booking successful!')
-      router.push('/mybookings')
+      const data = await res.json()
+  const bookingId = data.booking.id // 👈 Get the newly created booking ID
+
+  router.push(`/mybookings/${bookingId}`)
     } else {
       alert('Booking failed.')
     }

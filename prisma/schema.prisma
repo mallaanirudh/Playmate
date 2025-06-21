@@ -58,6 +58,15 @@ enum PaymentMethod {
   NET_BANKING
   WALLET
 }
+enum SportsType {
+  FOOTBALL
+  CRICKET
+  SWIMMING
+  KABADDI
+  ATHLETICS
+  CHESS
+
+}
 model User {
   id           String    @id @default(cuid())
   email_address        String    @unique
@@ -117,6 +126,7 @@ model Venue {
   hours          VenueHour[]
   reviews        Review[]
   favoriteVenues FavoriteVenue[]
+  bookings        Booking[]
 }
 
 model VenueImage {
@@ -187,23 +197,25 @@ model VenueHour {
 model Booking {
   id            String        @id @default(cuid())
   userId        String
-  courtId       String
+  venueId       String        // ✅ New field to link directly to Venue
+  courtId       String?       // ✅ Optional court now
   bookingDate   DateTime      @db.Date
-  startTime     String        // "HH:MM" format
+  startTime     String
   endTime       String
   durationHours Float
   totalAmount   Float
   bookingStatus BookingStatus @default(PENDING)
   paymentStatus PaymentStatus @default(PENDING)
   paymentMethod PaymentMethod?
-  paymentId     String?       // External payment gateway ID
+  paymentId     String?
   notes         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
   // Relations
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  court  Court   @relation(fields: [courtId], references: [id], onDelete: Cascade)
+  venue  Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  court  Court?  @relation(fields: [courtId], references: [id], onDelete: Cascade)
   review Review?
 }
 
@@ -288,6 +300,7 @@ model Tournament {
   status        TournamentStatus @default(PLANNED)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  sport         SportsType
 
   ownerId       String
   owner         User @relation(fields: [ownerId], references: [id])

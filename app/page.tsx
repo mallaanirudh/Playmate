@@ -69,21 +69,9 @@ export default function PlayMateLanding() {
               <div className="mb-8">
                 
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-black">
-                Find Your Perfect
-                <span className="block text-black-300">PlayMate</span>
-              </h1>
-              <p className="text-xl md:text-2xl mb-8 text-black-100 max-w-3xl mx-auto">
-                Connect with athletes, discover venues, and elevate your game
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onClick={()=>router.push('/dashboard')}className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-yellow-300 transform hover:scale-105 transition-all duration-300 shadow-lg">
-                  Find Venues
-                </button>
-                <button onClick = {()=>router.push('/dashboard/CreateVenue')}className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300">
-                  List Your Venue
-                </button>
-              </div>
+              
+              
+              
             </div>
           </div>
         </div>
