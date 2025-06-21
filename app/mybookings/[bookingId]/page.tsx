@@ -6,7 +6,7 @@ interface BookingPageProps {
   }
 }
 
-export default async function BookingConfirmationPage({ params }: BookingPageProps) {
+export default async function BookingConfirmationPage({params}:{ params : {bookingId: string}}) {
   const { bookingId } = await params
 
   const booking = await db.booking.findUnique({
