@@ -14,12 +14,14 @@ export default function Sidebar() {
     };
 
     const menuItems = [
+        {name : 'profile', path:'/profile'},
         { name: 'Dashboard', path: '/dashboard' },
         { name: 'Tournaments', path: '/tournaments' },
         { name: 'Venues', path: '/uservenues' },
         { name: 'Teams', path: '/dashboard' },
         { name: 'Challenges', path: '/dashboard' },
-        {name: 'mybookings', path: '/mybookings'}
+        {name: 'mybookings', path: '/mybookings'},
+        
     ];
 
     return (

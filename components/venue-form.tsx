@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { uploadImage } from '@/utils/uploadImage'; // you'll create this
+import { uploadImage } from '@/utils/uploadImage'; 
 import { useRouter } from 'next/navigation';
 
 export default function VenueForm() {

@@ -19,6 +19,10 @@ enum TournamentStatus {
   COMPLETED
   CANCELLED
 }
+enum CoachingStatus {
+  ACTIVE
+  INACTIVE
+}
 enum UserRole {
   CUSTOMER
   VENUE_OWNER
@@ -92,6 +96,8 @@ model User {
   favoriteVenues  FavoriteVenue[]
   notifications   Notification[]
   tournament      Tournament[]
+  coachingbooking CoachingBooking[]
+  coachingoffer   CoachingOffer[]
 }
 
 model Venue {
@@ -304,4 +310,41 @@ model Tournament {
 
   ownerId       String
   owner         User @relation(fields: [ownerId], references: [id])
+}
+model CoachingOffer {
+  id            String    @id @default(cuid())
+  coachId       String    // The coach is a User
+  title         String
+  description   String
+  price         Float
+  durationMins  Int
+  sport         SportsType
+  status        CoachingStatus @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  coach         User         @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  bookings      CoachingBooking[]
+}
+
+model CoachingBooking {
+  id              String    @id @default(cuid())
+  userId          String    // The learner
+  coachingOfferId String
+  bookingDate     DateTime  @db.Date
+  startTime       String
+  endTime         String
+  totalAmount     Float
+  bookingStatus   BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentMethod   PaymentMethod?
+  paymentId       String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coachingOffer   CoachingOffer @relation(fields: [coachingOfferId], references: [id], onDelete: Cascade)
 }
