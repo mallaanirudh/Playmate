@@ -2,30 +2,42 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
+const DEFAULT_LIMIT = 9
 
 export default function DashboardPage() {
-  const [venues, setVenues] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
+const router = useRouter()
 
-  useEffect(() => {
-    const fetchVenues = async () => {
-      try {
-        const res = await fetch('/api/getallvenues')
-        const data = await res.json()
-        if (res.ok) {
-          setVenues(data.venues)
-        } else {
-          console.error(data.error)
-        }
-      } catch (error) {
-        console.error('Error fetching venues:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+const page = parseInt(searchParams.get('page') || '1', 10)
+const [venues, setVenues] = useState<any[]>([])
+const [total, setTotal] = useState(0)
+const [loading, setLoading] = useState(true)
 
-    fetchVenues()
-  }, [])
+const fetchVenues = async (page: number) => {
+  setLoading(true)
+  try {
+    const res = await fetch(`/api/getallvenues?page=${page}&limit=${DEFAULT_LIMIT}`)
+    const data = await res.json()
+    setVenues(data.venues)
+    setTotal(data.total)
+  } catch (error) {
+    console.error('Error fetching venues:', error)
+  } finally {
+    setLoading(false)
+  }
+}
+
+useEffect(() => {
+  fetchVenues(page)
+}, [page])
+
+const totalPages = Math.ceil(total / DEFAULT_LIMIT)
+const goToPage = (newPage: number) => {
+  if (newPage < 1 || newPage > totalPages) return
+  router.push(`/dashboard?page=${newPage}`)
+}
+
 
   if (loading) {
     return (
@@ -195,6 +207,38 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+  <div className="flex justify-center mt-8 space-x-2">
+    <button
+      onClick={() => goToPage(page - 1)}
+      disabled={page === 1}
+      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+    >
+      Previous
+    </button>
+    {Array.from({ length: totalPages }, (_, i) => (
+      <button
+        key={i}
+        onClick={() => goToPage(i + 1)}
+        className={`px-3 py-1 rounded ${
+          page === i + 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
+        }`}
+      >
+        {i + 1}
+      </button>
+    ))}
+    <button
+      onClick={() => goToPage(page + 1)}
+      disabled={page === totalPages}
+      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+      )}
+
     </div>
   )
 }
