@@ -90,6 +90,8 @@ model User {
 
 
   // Relations
+  team           Team[]
+  
   venues          Venue[]
   bookings        Booking[]
   reviews         Review[]
@@ -98,6 +100,9 @@ model User {
   tournament      Tournament[]
   coachingbooking CoachingBooking[]
   coachingoffer   CoachingOffer[]
+  teams     TeamMember[]
+  challengesSent   Challenge[] @relation("ChallengesSent")
+  challengesReceived Challenge[] @relation("ChallengesReceived")
 }
 
 model Venue {
@@ -347,4 +352,37 @@ model CoachingBooking {
   // Relations
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   coachingOffer   CoachingOffer @relation(fields: [coachingOfferId], references: [id], onDelete: Cascade)
+}
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  createdBy String
+  creator   User     @relation(fields: [createdBy], references: [id])
+  members   TeamMember[]
+  createdAt DateTime @default(now())
+  challenge Challenge[]
+}
+
+model TeamMember {
+  id      String @id @default(cuid())
+  userId  String
+  teamId  String
+  role    String // e.g., 'member', 'admin'
+
+  user    User   @relation(fields: [userId], references: [id])
+  team    Team   @relation(fields: [teamId], references: [id])
+}
+
+model Challenge {
+  id             String   @id @default(cuid())
+  challengerId   String
+  opponentId     String
+  teamId         String
+  status         String   // pending, accepted, rejected, completed
+  scheduledAt    DateTime?
+  createdAt      DateTime @default(now())
+
+  challenger     User     @relation("ChallengesSent", fields: [challengerId], references: [id])
+  opponent       User     @relation("ChallengesReceived", fields: [opponentId], references: [id])
+  team           Team     @relation(fields: [teamId], references: [id])
 }
