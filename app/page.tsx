@@ -13,7 +13,7 @@ const items = [
 ];
 interface AnimatedCounterProps {
   target: number;
-  duration?: number; // optional, defaults to 2000
+  duration?: number; 
 }
 
 const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ target, duration = 2000 }) => {
@@ -46,7 +46,7 @@ export default function PlayMateLanding() {
   const [isVisible, setIsVisible] = useState(false);
   const router = useRouter();
   const handleClick = () => {
-    router.push('/about') // Replace with your target route
+    router.push('/about') 
   }
   
   useEffect(() => {

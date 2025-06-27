@@ -36,33 +36,47 @@ export default function RootLayout({
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <header className="flex justify-between items-center h-16 sticky top-0 z-50 px-6 shadow-md bg-blue-900 text-white">
   {/* Logo section */}
-  <div className="flex items-center gap-2">
-    <div className="w-10 h-10 bg-white rounded-sm" />
-    {/* Replace above with: <img src="/logo.png" alt="Logo" className="h-10" /> */}
-    <span className="text-lg font-semibold">PlayMate</span>
+  <div className="flex items-center gap-1">
+    <img src="/logoo.png" alt="Logo" className="h-10" />
+    
+    
   </div> 
-  <Link href="/dashboard">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-          Dashboard
-        </button>
+
+  {/* Right side: nav + auth */}
+  <div className="flex items-center gap-6">
+    {/* Navigation Links */}
+    <nav className="flex gap-4">
+      <Link href="/dashboard">
+        <button className="px-5 py-2 text-white rounded-lg hover:bg-blue-500">Home</button>
       </Link>
       <Link href="/uservenues">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-          My Venues
-        </button>
-        </Link>
+        <button className="px-5 py-2 text-white rounded-lg hover:bg-blue-500">Venues</button>
+       
+      </Link>
+      <Link href="/tournaments">
+        <button className="px-5 py-2 text-white rounded-lg hover:bg-blue-500">Tournaments</button>
+      </Link>
+      <Link href="/community">
+        <button className="px-5 py-2 text-white rounded-lg hover:bg-blue-500">Community</button>
+      </Link>
+      <Link href="/carrer">
+        <button className="px-5 py-2 text-white rounded-lg hover:bg-blue-500">Carrer</button>
+      </Link>
+      
+    </nav>
 
-  {/* Auth section */}
-  <div className="flex items-center gap-4">
-    <SignedOut>
-      <SignInButton />
-      <SignUpButton />
-    </SignedOut>
-    <SignedIn>
-      <UserButton />
-    </SignedIn>
-        </div>
-        </header>
+    {/* Auth Section */}
+    <div className="flex items-center gap-4">
+      <SignedOut>
+        <SignInButton />
+        <SignUpButton />
+      </SignedOut>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+    </div>
+  </div>
+</header>
 
           {children}
         </body>
