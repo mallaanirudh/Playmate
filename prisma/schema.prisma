@@ -69,6 +69,7 @@ enum SportsType {
   KABADDI
   ATHLETICS
   CHESS
+  TENNIS
 
 }
 model User {
@@ -318,7 +319,7 @@ model Tournament {
 }
 model CoachingOffer {
   id            String    @id @default(cuid())
-  coachId       String    // The coach is a User
+  coachId       String    
   title         String
   description   String
   price         Float
@@ -331,6 +332,7 @@ model CoachingOffer {
   // Relations
   coach         User         @relation(fields: [coachId], references: [id], onDelete: Cascade)
   bookings      CoachingBooking[]
+  coachingslots CoachingSlot[]
 }
 
 model CoachingBooking {
@@ -353,6 +355,17 @@ model CoachingBooking {
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   coachingOffer   CoachingOffer @relation(fields: [coachingOfferId], references: [id], onDelete: Cascade)
 }
+model CoachingSlot {
+  id              String    @id @default(cuid())
+  coachingOfferId String
+  date            DateTime  @db.Date
+  startTime       String
+  endTime         String
+  isBooked        Boolean   @default(false)
+
+  coachingOffer   CoachingOffer @relation(fields: [coachingOfferId], references: [id], onDelete: Cascade)
+}
+
 model Team {
   id        String   @id @default(cuid())
   name      String
