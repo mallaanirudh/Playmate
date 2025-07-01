@@ -139,6 +139,7 @@ model Venue {
   reviews        Review[]
   favoriteVenues FavoriteVenue[]
   bookings        Booking[]
+  venueslot        VenueSlot[]
 }
 
 model VenueImage {
@@ -399,3 +400,16 @@ model Challenge {
   opponent       User     @relation("ChallengesReceived", fields: [opponentId], references: [id])
   team           Team     @relation(fields: [teamId], references: [id])
 }
+model VenueSlot {
+  id        String   @id @default(cuid())
+  venueId   String
+  date      DateTime @db.Date
+  startTime String
+  endTime   String
+  isBooked  Boolean  @default(false)
+
+  // Relation
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+}
+
+

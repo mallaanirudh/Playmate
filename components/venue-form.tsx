@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { uploadImage } from '@/utils/uploadImage'; 
+import { uploadImage } from '@/utils/uploadImage';
 import { useRouter } from 'next/navigation';
 
 export default function VenueForm() {
@@ -18,9 +18,10 @@ export default function VenueForm() {
     email: '',
     websiteUrl: '',
   });
-   const router = useRouter();
 
+  const [slots, setSlots] = useState([{ date: '', startTime: '', endTime: '' }]);
 
+  const router = useRouter();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -49,53 +50,69 @@ export default function VenueForm() {
     }
   };
 
+  const handleSlotChange = (index: number, field: string, value: string) => {
+    const updated = [...slots];
+    updated[index][field as keyof typeof slots[0]] = value;
+    setSlots(updated);
+  };
+
+  const addSlot = () => {
+    setSlots([...slots, { date: '', startTime: '', endTime: '' }]);
+  };
+
+  const removeSlot = (index: number) => {
+    if (slots.length === 1) return;
+    const updated = [...slots];
+    updated.splice(index, 1);
+    setSlots(updated);
+  };
+
   const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
-  e.preventDefault();
-  if (!imageUrl) return alert('Please upload an image before submitting.');
+    e.preventDefault();
+    if (!imageUrl) return alert('Please upload an image before submitting.');
 
-  try {
-    // 1. Create Venue
-    const res = await fetch('/api/venue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData), // remove imageUrl, we will link image separately
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      const venueId = data.venue.id; // Assuming API returns the created venue
-
-      // 2. Upload Venue Image record
-      const imageRes = await fetch('/api/venueImage', { // create this API
+    try {
+      const res = await fetch('/api/venue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          venueId,
-          imageUrl,
-          isPrimary: true,
-          caption: 'Optional Caption',
-        }),
+        body: JSON.stringify({ ...formData, slots }),
       });
 
-      const imageData = await imageRes.json();
+      const data = await res.json();
 
-      if (imageData.success) {
-        alert('Venue and image created successfully!');
-        router.push('/uservenues');  //Pushing the users, if sucessfull to another page to not let him submit the same thing multiple times. Is there a better method? try it.
+      if (data.success) {
+        const venueId = data.venue.id;
+
+        const imageRes = await fetch('/api/venueImage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            venueId,
+            imageUrl,
+            isPrimary: true,
+            caption: 'Optional Caption',
+          }),
+        });
+
+        const imageData = await imageRes.json();
+
+        if (imageData.success) {
+          alert('Venue and image created successfully!');
+          router.push('/uservenues');
+        } else {
+          alert('Venue created, but failed to save image: ' + imageData.error);
+        }
       } else {
-        alert('Venue created, but failed to save image: ' + imageData.error);
+        alert('Failed to create venue: ' + data.error);
       }
-    } else {
-      alert('Failed to create venue: ' + data.error);
+    } catch (err: any) {
+      alert('Error submitting form: ' + err.message);
     }
-  } catch (err: any) {
-    alert('Error submitting form: ' + err.message);
-  }
-};
+  };
 
-  const inputClasses = "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white";
-  const labelClasses = "block text-sm font-medium text-gray-700 mb-2";
+  const inputClasses =
+    'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white';
+  const labelClasses = 'block text-sm font-medium text-gray-700 mb-2';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
@@ -107,8 +124,8 @@ export default function VenueForm() {
           </div>
 
           <div className="space-y-6">
-            {/* Basic Information Section */}
-            <div className="bg-gray-50 rounded-lg p-6">
+              
+              <div className="bg-gray-50 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">1</span>
                 Basic Information
@@ -155,8 +172,6 @@ export default function VenueForm() {
                 />
               </div>
             </div>
-
-            {/* Location Section */}
             <div className="bg-gray-50 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">2</span>
@@ -232,8 +247,6 @@ export default function VenueForm() {
                 </div>
               </div>
             </div>
-
-            {/* Contact Information Section */}
             <div className="bg-gray-50 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">3</span>
@@ -275,8 +288,6 @@ export default function VenueForm() {
                 />
               </div>
             </div>
-
-            {/* Image Upload Section */}
             <div className="bg-gray-50 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">4</span>
@@ -327,6 +338,68 @@ export default function VenueForm() {
                     <span className="text-sm font-medium">Image uploaded successfully!</span>
                   </div>
                 )}
+              </div>
+            </div>
+
+
+
+
+            {/* Slot Section */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">5</span>
+                Available Slots
+              </h2>
+
+              <div className="space-y-4">
+                {slots.map((slot, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div>
+                      <label className={labelClasses}>Date</label>
+                      <input
+                        type="date"
+                        value={slot.date}
+                        onChange={(e) => handleSlotChange(index, 'date', e.target.value)}
+                        className={inputClasses}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClasses}>Start Time</label>
+                      <input
+                        type="time"
+                        value={slot.startTime}
+                        onChange={(e) => handleSlotChange(index, 'startTime', e.target.value)}
+                        className={inputClasses}
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1">
+                        <label className={labelClasses}>End Time</label>
+                        <input
+                          type="time"
+                          value={slot.endTime}
+                          onChange={(e) => handleSlotChange(index, 'endTime', e.target.value)}
+                          className={inputClasses}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSlot(index)}
+                        className="text-red-500 text-sm mt-5 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={addSlot}
+                  className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium"
+                >
+                  + Add Slot
+                </button>
               </div>
             </div>
 
